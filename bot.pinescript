@@ -1,0 +1,38 @@
+//@version=4
+strategy("Bollinger Bands and Fibonacci Retracement Strategy", overlay=true)
+
+// Bollinger Bands
+length = input(title="Bollinger Bands Length", type=input.integer, defval=20)
+mult = input(title="Bollinger Bands Standard Deviations", type=input.float, defval=2.0)
+src = input(title="Bollinger Bands Source", type=input.source, defval=close)
+basis = sma(src, length)
+dev = mult * stdev(src, length)
+upper = basis + dev
+lower = basis - dev
+
+// Fibonacci Retracement
+fib_high = highest(length)
+fib_low = lowest(length)
+fib_range = fib_high - fib_low
+fib_38 = fib_high - fib_range * 0.382
+fib_50 = fib_high - fib_range * 0.5
+fib_62 = fib_high - fib_range * 0.618
+
+// Entry and Exit Conditions
+long_entry = close <= lower and close >= fib_50
+short_entry = close >= upper and close <= fib_50
+
+if long_entry
+    strategy.entry("Buy", strategy.long)
+if short_entry
+    strategy.entry("Sell", strategy.short)
+
+// Plotting
+plot(basis, "Basis", color=#000000)
+p1 = plot(upper, "Upper", color=#FF0000)
+p2 = plot(lower, "Lower", color=#008000)
+fill(p1, p2, color=color.new(#FF0000, 90))
+
+plot(fib_38, "38.2%", color=#FFA500, style=plot.style_linebr, linewidth=1)
+plot(fib_50, "50.0%", color=#FFA500, style=plot.style_linebr, linewidth=1)
+plot(fib_62, "61.8%", color=#FFA500, style=plot.style_linebr, linewidth=1)
